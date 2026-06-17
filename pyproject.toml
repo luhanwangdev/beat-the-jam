@@ -1,0 +1,26 @@
+[project]
+name = "traffic-speed"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "luhanwangdev", email = "r10521523@ntu.edu.tw" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.137.1",
+    "httpx>=0.28.1",
+    "uvicorn[standard]>=0.49.0",
+]
+
+[project.scripts]
+traffic-speed = "traffic_speed:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.0",
+]
