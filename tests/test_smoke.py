@@ -1,5 +1,5 @@
-import traffic_speed
+import corridor
 
 
-def test_package_imports():
-    assert traffic_speed is not None
+def test_corridor_module_imports():
+    assert corridor.CORRIDOR

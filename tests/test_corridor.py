@@ -1,5 +1,5 @@
 import pytest
-from traffic_speed.corridor import CORRIDOR, STOPS, Segment, resolve_segments
+from corridor import CORRIDOR, STOPS, Segment, resolve_segments
 
 
 def test_chain_is_contiguous_within_each_freeway():

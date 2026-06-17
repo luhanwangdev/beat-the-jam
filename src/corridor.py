@@ -1,4 +1,4 @@
-# src/traffic_speed/corridor.py
+# src/corridor.py
 #
 # Hardcoded Hwy1→3→5 corridor from 國1 ~25 km (三重) to 頭城 (宜蘭).
 #
@@ -12,7 +12,7 @@
 #   Enter 國1 northbound (N) at ~25 km (三重 area).
 #   Drive N (milepost decreasing) toward 台北 / 基隆.
 #   At km ~14.7 (東湖→汐止系統) the M05A pair transfers onto 國3 southbound.
-#   国3 S continues from 汐止系統 through 新台五路 to 南港系統 (km ~15.8).
+#   國3 S continues from 汐止系統 through 新台五路 to 南港系統 (km ~15.8).
 #   At 南港系統 the M05A pair transfers onto 國5 southbound at 05F0000S.
 #   國5 S runs through 雪山隧道 (Xueshan Tunnel) to 頭城 (km ~28.7).
 from __future__ import annotations
@@ -83,6 +83,6 @@ def resolve_segments(origin: str, destination: str) -> list[Segment]:
     return CORRIDOR[STOPS[origin] : STOPS[destination]]
 
 
-def corridor_direction(segments: list[Segment]) -> str:  # noqa: ARG001
+def corridor_direction(_segments: list[Segment]) -> str:
     """Return a human-readable direction label for this corridor."""
     return "宜蘭方向"
