@@ -20,27 +20,53 @@ class Summary:
     slowest_kmh: float | None
 
 
-def compute_bins(records: list[Record], start: datetime, end: datetime,
-                 bin_minutes: int) -> list[Bin]:
+def compute_bins(
+    records: list[Record],
+    start: datetime,
+    end: datetime,
+    bin_minutes: int,
+    seg_lengths: dict[tuple[str, str], float],
+) -> list[Bin]:
+    """Aggregate records into time bins using distance-weighted harmonic mean.
+
+    Effective speed = Σlength / Σ(length/speed), which gives the true
+    journey speed over the entire corridor and correctly weights long congested
+    segments over short free-flowing ones.
+
+    Records are excluded if:
+    - outside [start, end)
+    - speed <= 0
+    - the segment's length is 0 (cross-freeway transfers) or unknown
+    """
     step = timedelta(minutes=bin_minutes)
     edges: list[datetime] = []
     t = start
     while t < end:
         edges.append(t)
         t += step
-    buckets: dict[datetime, list[float]] = {e: [] for e in edges}
+
+    # Each bucket holds (length, speed) pairs for the harmonic mean
+    buckets: dict[datetime, list[tuple[float, float]]] = {e: [] for e in edges}
+
     for rec in records:
         if not (start <= rec.ts < end):
             continue
         if rec.speed <= 0:
             continue
+        length = seg_lengths.get((rec.gantry_from, rec.gantry_to), 0.0)
+        if length <= 0:
+            continue
         idx = int((rec.ts - start) / step)
-        buckets[edges[idx]].append(rec.speed)
+        buckets[edges[idx]].append((length, rec.speed))
+
     bins: list[Bin] = []
     for e in edges:
-        speeds = buckets[e]
-        if speeds:
-            bins.append(Bin(e, round(median(speeds), 1), len(speeds), "ok"))
+        obs = buckets[e]
+        if obs:
+            total_dist = sum(length for length, _ in obs)
+            total_time = sum(length / speed for length, speed in obs)
+            avg = round(total_dist / total_time, 1) if total_time > 0 else None
+            bins.append(Bin(e, avg, len(obs), "ok" if avg is not None else "no_data"))
         else:
             bins.append(Bin(e, None, 0, "no_data"))
     return bins
