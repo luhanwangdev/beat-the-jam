@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from statistics import median
 
 from parser import Record
 
@@ -65,8 +64,9 @@ def compute_bins(
         if obs:
             total_dist = sum(length for length, _ in obs)
             total_time = sum(length / speed for length, speed in obs)
-            avg = round(total_dist / total_time, 1) if total_time > 0 else None
-            bins.append(Bin(e, avg, len(obs), "ok" if avg is not None else "no_data"))
+            # Non-empty obs have speed>0 and length>0, so total_time is always >0.
+            avg = round(total_dist / total_time, 1)
+            bins.append(Bin(e, avg, len(obs), "ok"))
         else:
             bins.append(Bin(e, None, 0, "no_data"))
     return bins
@@ -77,5 +77,12 @@ def summarize(bins: list[Bin]) -> Summary:
     if not ok:
         return Summary(None, None, None)
     slowest = min(ok, key=lambda b: b.avg_speed_kmh)
-    overall = round(median([b.avg_speed_kmh for b in ok]), 1)
+    # Use a sample-count-weighted harmonic mean so slow, well-sampled bins pull
+    # the headline figure down — consistent with per-bin distance/time logic and
+    # avoids the median's tendency to hide the congestion trough.
+    overall = round(
+        sum(b.sample_count for b in ok)
+        / sum(b.sample_count / b.avg_speed_kmh for b in ok),
+        1,
+    )
     return Summary(overall, slowest.bin_start, slowest.avg_speed_kmh)

@@ -107,3 +107,6 @@ def test_summary_picks_slowest_ok_bin():
     s = summarize(bins)
     assert s.slowest_kmh == 30.0
     assert s.slowest_bin == datetime(2025, 5, 29, 22, 30)
+    # overall_avg_kmh is a sample-count-weighted harmonic mean (not median):
+    # (1+1) / (1/60 + 1/30) = 2 / 0.05 = 40.0
+    assert s.overall_avg_kmh == 40.0

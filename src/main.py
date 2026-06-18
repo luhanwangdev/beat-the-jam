@@ -38,9 +38,12 @@ def speed(
         raise HTTPException(400, str(exc)) from exc
 
     wanted = {(s.gantry_from, s.gantry_to) for s in segments}
+    # Subtract 1 microsecond so a midnight-aligned end doesn't pull in a wasted
+    # extra day whose bins would all be trimmed away by the strict < end filter.
+    last_needed = (end - timedelta(microseconds=1)).date()
     days = []
     d = start.date()
-    while d <= end.date():
+    while d <= last_needed:
         days.append(d)
         d += timedelta(days=1)
 
