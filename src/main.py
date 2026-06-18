@@ -140,6 +140,9 @@ def journey(
         "origin": origin,
         "destination": destination,
         "direction": corridor_direction(segments),
+        # Transfer segments are 0 km, so summing all segments equals the
+        # measurable-only distance compute_journey_times uses as the
+        # effective_kmh numerator — keep them consistent per the spec.
         "distance_km": round(sum(s.length_km for s in segments), 1),
         "start": start.isoformat(),
         "end": end.isoformat(),
