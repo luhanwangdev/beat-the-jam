@@ -112,3 +112,25 @@ def test_journey_only_zero_length_transfer_no_crash():
     assert j.effective_kmh == 0.0
     assert j.journey_minutes == 0.0
     assert j.status == "ok"  # no measurable segments, so no fallback used
+
+
+from journey import summarize_journeys, JourneySummary
+
+
+def test_summarize_picks_fastest_and_slowest():
+    js = [
+        Journey(datetime(2025, 5, 29, 20, 0), datetime(2025, 5, 29, 20, 30),
+                30.0, 40.0, "ok"),
+        Journey(datetime(2025, 5, 29, 20, 30), datetime(2025, 5, 29, 20, 50),
+                20.0, 60.0, "ok"),
+    ]
+    s = summarize_journeys(js)
+    assert s.fastest_depart == datetime(2025, 5, 29, 20, 30)
+    assert s.fastest_minutes == 20.0
+    assert s.slowest_depart == datetime(2025, 5, 29, 20, 0)
+    assert s.slowest_minutes == 30.0
+
+
+def test_summarize_empty_is_all_none():
+    s = summarize_journeys([])
+    assert s == JourneySummary(None, None, None, None)

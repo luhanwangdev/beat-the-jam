@@ -105,3 +105,22 @@ def compute_journey_times(
             )
         )
     return journeys
+
+
+@dataclass
+class JourneySummary:
+    fastest_depart: datetime | None
+    fastest_minutes: float | None
+    slowest_depart: datetime | None
+    slowest_minutes: float | None
+
+
+def summarize_journeys(journeys: list[Journey]) -> JourneySummary:
+    if not journeys:
+        return JourneySummary(None, None, None, None)
+    fastest = min(journeys, key=lambda j: j.journey_minutes)
+    slowest = max(journeys, key=lambda j: j.journey_minutes)
+    return JourneySummary(
+        fastest.depart, fastest.journey_minutes,
+        slowest.depart, slowest.journey_minutes,
+    )
