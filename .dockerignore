@@ -1,0 +1,18 @@
+# Host virtualenv hardcodes local absolute paths — never copy it into the image.
+.venv
+# Python caches
+__pycache__/
+*.pyc
+.pytest_cache/
+# VCS and tooling
+.git/
+.gitignore
+.ruff_cache/
+.mypy_cache/
+# Local-only / non-runtime files
+scratch/
+docs/
+tests/
+*.md
+Dockerfile
+.dockerignore

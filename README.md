@@ -37,11 +37,29 @@ A single hardcoded *homebound corridor* (Hwy-1 N → Hwy-3 → Hwy-5 S → Touch
 
 ## 快速開始 / Quick start
 
+### Docker(最快 / fastest)
+
+```bash
+# 建立映像 / build the image
+docker build -t beat-the-jam .
+
+# 啟動服務(對外 8000 埠,Ctrl-C 結束)/ run the service (port 8000, Ctrl-C to stop)
+docker run --rm -p 8000:8000 beat-the-jam
+
+# 開互動式 API 文件 / open interactive API docs
+open http://127.0.0.1:8000/docs
+```
+
+不需在本機裝 Python 或 uv。映像以 uv 官方鏡像為基底,啟動即跑 uvicorn。
+No local Python or uv needed. The image is based on the official uv image and runs uvicorn on start.
+
+### 本機 / Local (uv)
+
 ```bash
 # 安裝依賴 / install deps
 uv sync
 
-# 啟動開發伺服器 / run the dev server
+# 啟動開發伺服器(--reload 熱重載)/ run the dev server (hot reload)
 uv run uvicorn main:app --app-dir src --reload
 
 # 開互動式 API 文件 / open interactive API docs
