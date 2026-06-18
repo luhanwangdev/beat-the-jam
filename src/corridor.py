@@ -91,6 +91,31 @@ def resolve_segments(origin: str, destination: str) -> list[Segment]:
     return CORRIDOR[STOPS[origin] : STOPS[destination]]
 
 
+def resolve_segments_by_gantry(origin: str, destination: str) -> list[Segment]:
+    """Return the CORRIDOR slice between two gantry ids.
+
+    `origin` matches a segment's gantry_from; `destination` matches a
+    segment's gantry_to. Raises ValueError if either id is absent or if
+    origin does not come before destination along the corridor.
+    """
+    start_idx = next(
+        (i for i, s in enumerate(CORRIDOR) if s.gantry_from == origin), None
+    )
+    if start_idx is None:
+        raise ValueError(f"unknown origin gantry: {origin!r}")
+    end_idx = next(
+        (i for i, s in enumerate(CORRIDOR) if s.gantry_to == destination), None
+    )
+    if end_idx is None:
+        raise ValueError(f"unknown destination gantry: {destination!r}")
+    if start_idx > end_idx:
+        raise ValueError(
+            f"origin {origin!r} must come before destination {destination!r} "
+            "along the corridor"
+        )
+    return CORRIDOR[start_idx : end_idx + 1]
+
+
 def corridor_direction(_segments: list[Segment]) -> str:
     """Return a human-readable direction label for this corridor."""
     return "宜蘭方向"

@@ -51,3 +51,29 @@ def test_segment_length_km():
     # Cross-freeway transfer: 01F → 03F → 0.0 km
     s3 = Segment("01F", "01F0147N", "03F0116S", "N", "東湖→汐止系統(轉國3)")
     assert s3.length_km == 0.0
+
+
+def test_resolve_by_gantry_slices_corridor():
+    from corridor import resolve_segments_by_gantry
+    segs = resolve_segments_by_gantry("01F0213N", "05F0287S")
+    assert segs[0].gantry_from == "01F0213N"
+    assert segs[-1].gantry_to == "05F0287S"
+
+
+def test_resolve_by_gantry_unknown_origin_raises():
+    from corridor import resolve_segments_by_gantry
+    with pytest.raises(ValueError):
+        resolve_segments_by_gantry("ZZZ9999N", "05F0287S")
+
+
+def test_resolve_by_gantry_unknown_destination_raises():
+    from corridor import resolve_segments_by_gantry
+    with pytest.raises(ValueError):
+        resolve_segments_by_gantry("01F0213N", "ZZZ9999S")
+
+
+def test_resolve_by_gantry_wrong_order_raises():
+    from corridor import resolve_segments_by_gantry
+    # 05F0055S is gantry_from of the last segment; 01F0153N is gantry_to of an early one
+    with pytest.raises(ValueError):
+        resolve_segments_by_gantry("05F0055S", "01F0153N")
