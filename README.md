@@ -12,6 +12,12 @@
 
 A single hardcoded *homebound corridor* (Hwy-1 N → Hwy-3 → Hwy-5 S → Toucheng, heading to Yilan) that you query for historical speeds. The route and direction are hardcoded — **not** user input; you only choose where along the corridor and when.
 
+![圓山 → 頭城,出發時間 vs 實際行車時間(2025-05-29 晚間)/ Yuanshan → Toucheng, departure time vs actual journey time](assets/journey-example.png)
+
+上圖是 `GET /journey`(圓山 `01F0213N` → 頭城 `05F0287S`,2025-05-29 連假前夕)輸出的視覺化:21:00 前後出發要塞約 **61 分鐘**,撐到 **00:30** 出發只要 **26 分鐘** —— 這正是本服務要替你找出的「最該出發的時間」。
+
+The chart above visualizes `GET /journey` (Yuanshan `01F0213N` → Toucheng `05F0287S`, the eve of a 2025-05-29 long weekend): leaving around 21:00 costs ~**61 min**, but holding out until **00:30** takes just **26 min** — exactly the "best time to leave" this service finds for you.
+
 ## 資料來源 / Data source
 
 - 高公局 TDCS **M05A** 公開歸檔,免認證:`https://tisvcloud.freeway.gov.tw/history/TDCS/M05A/M05A_<YYYYMMDD>.tar.gz`
