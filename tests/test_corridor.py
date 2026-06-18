@@ -77,3 +77,35 @@ def test_resolve_by_gantry_wrong_order_raises():
     # 05F0055S is gantry_from of the last segment; 01F0153N is gantry_to of an early one
     with pytest.raises(ValueError):
         resolve_segments_by_gantry("05F0055S", "01F0153N")
+
+
+def test_corridor_gantries_count_and_order():
+    from corridor import corridor_gantries
+    pts = corridor_gantries()
+    assert len(pts) == 11
+    assert pts[0].id == "01F0256N"
+    assert pts[-1].id == "05F0287S"
+    # ids unique
+    assert len({p.id for p in pts}) == 11
+
+
+def test_corridor_gantries_endpoint_flags():
+    from corridor import corridor_gantries
+    pts = corridor_gantries()
+    # first point: only an origin; last point: only a destination
+    assert pts[0].can_origin is True
+    assert pts[0].can_destination is False
+    assert pts[-1].can_origin is False
+    assert pts[-1].can_destination is True
+    # an interior point is both
+    assert pts[1].can_origin is True
+    assert pts[1].can_destination is True
+
+
+def test_corridor_gantries_field_derivation():
+    from corridor import corridor_gantries
+    last = corridor_gantries()[-1]
+    assert last.id == "05F0287S"
+    assert last.freeway == "05F"
+    assert last.milepost_km == 28.7
+    assert last.direction == "S"

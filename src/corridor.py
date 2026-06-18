@@ -37,6 +37,16 @@ class Segment:
         return abs(int(self.gantry_to[3:7]) - int(self.gantry_from[3:7])) / 10.0
 
 
+@dataclass(frozen=True)
+class GantryPoint:
+    id: str
+    freeway: str
+    milepost_km: float
+    direction: str
+    can_origin: bool       # is some segment's gantry_from (every point except the last)
+    can_destination: bool  # is some segment's gantry_to (every point except the first)
+
+
 # ---------------------------------------------------------------------------
 # CORRIDOR — ordered from 國1 ~25k on-ramp to 頭城.
 #
@@ -114,6 +124,29 @@ def resolve_segments_by_gantry(origin: str, destination: str) -> list[Segment]:
             "along the corridor"
         )
     return CORRIDOR[start_idx : end_idx + 1]
+
+
+def corridor_gantries() -> list[GantryPoint]:
+    """Return the ordered, deduped gantry points along CORRIDOR.
+
+    Points = first segment's gantry_from, then each segment's gantry_to.
+    The chain is contiguous in ids, so this yields len(CORRIDOR)+1 points.
+    can_origin/can_destination encode the /journey rule: origin must be a
+    gantry_from, destination must be a gantry_to.
+    """
+    ids = [CORRIDOR[0].gantry_from] + [s.gantry_to for s in CORRIDOR]
+    last = len(ids) - 1
+    return [
+        GantryPoint(
+            id=gid,
+            freeway=gid[:3],
+            milepost_km=int(gid[3:7]) / 10.0,
+            direction=gid[7],
+            can_origin=(i < last),
+            can_destination=(i > 0),
+        )
+        for i, gid in enumerate(ids)
+    ]
 
 
 def corridor_direction(_segments: list[Segment]) -> str:
