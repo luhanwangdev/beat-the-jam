@@ -52,3 +52,55 @@ def speed_at(
         if spd and spd > 0:
             return spd
     return None
+
+
+@dataclass
+class Journey:
+    depart: datetime
+    arrive: datetime
+    journey_minutes: float
+    effective_kmh: float
+    status: str  # "ok" | "partial"
+
+
+def compute_journey_times(
+    index: SpeedIndex,
+    segments: list[Segment],
+    departures: list[datetime],
+    *,
+    free_flow_kmh: float = FREE_FLOW_KMH,
+) -> list[Journey]:
+    """Forward-simulate one car per departure time through `segments`.
+
+    For each segment, look up the speed at the CURRENT clock; advance the clock
+    by length/speed. Offline (speed_at -> None) carries the last-known speed
+    forward (free_flow_kmh seeds the first segment) and marks the journey
+    "partial". Zero-length transfer segments are skipped.
+    """
+    measurable = [s for s in segments if s.length_km > 0]
+    journeys: list[Journey] = []
+    for depart in departures:
+        clock = depart
+        total_dist = 0.0
+        last_speed = free_flow_kmh
+        used_fallback = False
+        for s in measurable:
+            spd = speed_at(index, (s.gantry_from, s.gantry_to), clock)
+            if spd is None:
+                spd = last_speed
+                used_fallback = True
+            else:
+                last_speed = spd
+            clock += timedelta(hours=s.length_km / spd)
+            total_dist += s.length_km
+        total_hours = (clock - depart).total_seconds() / 3600
+        journeys.append(
+            Journey(
+                depart=depart,
+                arrive=clock,
+                journey_minutes=round(total_hours * 60, 1),
+                effective_kmh=round(total_dist / total_hours, 1),
+                status="partial" if used_fallback else "ok",
+            )
+        )
+    return journeys
