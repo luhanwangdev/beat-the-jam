@@ -94,12 +94,13 @@ def compute_journey_times(
             clock += timedelta(hours=s.length_km / spd)
             total_dist += s.length_km
         total_hours = (clock - depart).total_seconds() / 3600
+        effective_kmh = round(total_dist / total_hours, 1) if total_hours > 0 else 0.0
         journeys.append(
             Journey(
                 depart=depart,
                 arrive=clock,
                 journey_minutes=round(total_hours * 60, 1),
-                effective_kmh=round(total_dist / total_hours, 1),
+                effective_kmh=effective_kmh,
                 status="partial" if used_fallback else "ok",
             )
         )

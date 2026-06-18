@@ -99,3 +99,16 @@ def test_journey_skips_zero_length_transfer_segments():
     )
     # transfer contributes 0 distance and 0 time; only SEG1+SEG2 count (20 km)
     assert j.effective_kmh == 60.0
+
+
+def test_journey_only_zero_length_transfer_no_crash():
+    # Regression test: empty measurable list (only zero-length transfer) should not crash
+    transfer = Segment("01F", "01F0100N", "03F0116S", "N", "transfer")  # length 0
+    idx = index_speeds([])  # no data
+    [j] = compute_journey_times(
+        idx, [transfer], [datetime(2025, 5, 29, 20, 0)]
+    )
+    # No measurable segments: total_hours = 0, effective_kmh should be 0.0, not crash
+    assert j.effective_kmh == 0.0
+    assert j.journey_minutes == 0.0
+    assert j.status == "ok"  # no measurable segments, so no fallback used
