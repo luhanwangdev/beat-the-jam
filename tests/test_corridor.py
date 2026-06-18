@@ -36,3 +36,18 @@ def test_resolve_rejects_reversed_order():
 def test_resolve_rejects_unknown_stop():
     with pytest.raises(ValueError):
         resolve_segments("火星", "頭城")
+
+
+def test_segment_length_km():
+    from corridor import Segment
+    # Same-freeway, southbound 國5: 05F0055S → 05F0287S → 23.2 km
+    s1 = Segment("05F", "05F0055S", "05F0287S", "S", "雪隧段")
+    assert s1.length_km == 23.2
+
+    # Same-freeway, northbound 國1: 01F0256N → 01F0233N → 2.3 km
+    s2 = Segment("01F", "01F0256N", "01F0233N", "N", "三重→臺北")
+    assert s2.length_km == 2.3
+
+    # Cross-freeway transfer: 01F → 03F → 0.0 km
+    s3 = Segment("01F", "01F0147N", "03F0116S", "N", "東湖→汐止系統(轉國3)")
+    assert s3.length_km == 0.0

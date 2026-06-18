@@ -28,6 +28,14 @@ class Segment:
     direction: str    # "N" | "S"
     label: str
 
+    @property
+    def length_km(self) -> float:
+        # gantry id = <3-char freeway><4-digit milepost in 0.1km><dir>, e.g. 05F0287S
+        # cross-freeway transfer segments: mileposts are on different bases → not comparable → 0
+        if self.gantry_from[:3] != self.gantry_to[:3]:
+            return 0.0
+        return abs(int(self.gantry_to[3:7]) - int(self.gantry_from[3:7])) / 10.0
+
 
 # ---------------------------------------------------------------------------
 # CORRIDOR — ordered from 國1 ~25k on-ramp to 頭城.
