@@ -142,3 +142,21 @@ def test_journey_fetches_arrival_buffer_day(monkeypatch):
     # end + 2h buffer = 2025-05-30 01:45 -> must fetch both days
     assert date(2025, 5, 29) in called_days
     assert date(2025, 5, 30) in called_days
+
+
+def test_gantries_endpoint_lists_corridor_points():
+    from fastapi.testclient import TestClient
+    from main import app
+    resp = TestClient(app).get("/gantries")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["direction"] == "宜蘭方向"
+    pts = body["gantries"]
+    assert len(pts) == 11
+    assert {"id", "freeway", "milepost_km", "direction",
+            "can_origin", "can_destination"} == set(pts[0].keys())
+    # first point only origin, last point only destination
+    assert pts[0]["id"] == "01F0256N"
+    assert pts[0]["can_origin"] is True and pts[0]["can_destination"] is False
+    assert pts[-1]["id"] == "05F0287S"
+    assert pts[-1]["can_origin"] is False and pts[-1]["can_destination"] is True

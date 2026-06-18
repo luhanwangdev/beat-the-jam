@@ -6,7 +6,9 @@ from fastapi import FastAPI, HTTPException, Query
 from aggregate import compute_bins, summarize
 from archive import ArchiveUnavailable, fetch_day_records
 from corridor import (
+    CORRIDOR,
     corridor_direction,
+    corridor_gantries,
     resolve_segments,
     resolve_segments_by_gantry,
 )
@@ -161,4 +163,20 @@ def journey(
             "slowest_depart": summary.slowest_depart.isoformat() if summary.slowest_depart else None,
             "slowest_minutes": summary.slowest_minutes,
         },
+    }
+
+
+@app.get("/gantries")
+def gantries():
+    return {
+        "direction": corridor_direction(CORRIDOR),
+        "gantries": [
+            {"id": g.id,
+             "freeway": g.freeway,
+             "milepost_km": g.milepost_km,
+             "direction": g.direction,
+             "can_origin": g.can_origin,
+             "can_destination": g.can_destination}
+            for g in corridor_gantries()
+        ],
     }
