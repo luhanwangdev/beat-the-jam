@@ -13,10 +13,10 @@
 
 ## 架構
 
-走廊優先:寫死一條回家路線(國1 北向 → 國3 → 國5 南向 → 頭城)。方向與車種由系統推導,非使用者輸入。端點:`GET /speed`(逐 bin 瞬時車速曲線,named stops 輸入)與 `GET /journey`(出發時間→實際行車時間曲線,gantry id 輸入,時間相依模擬,跨日多抓 2h 緩衝)。**不做快取**(每次即時下載當日檔)。
+走廊優先:寫死一條回家路線(國1 北向 → 國3 → 國5 南向 → 頭城)。方向與車種由系統推導,非使用者輸入。端點:`GET /speed`(逐 bin 瞬時車速曲線,named stops 輸入)、`GET /journey`(出發時間→實際行車時間曲線,gantry id 輸入,時間相依模擬,跨日多抓 2h 緩衝)、`GET /gantries`(列出走廊 11 個有序門架點,純資料、無下載/驗證,供呼叫者得知 `/journey` 可填的 origin/destination)。**不做快取**(每次即時下載當日檔)。
 
 模組(扁平於 `src/`,無 `traffic_speed/` 子資料夾;模組間用扁平 import 如 `from corridor import ...`):
-- `corridor.py` — `Segment`、`CORRIDOR`、`STOPS`、`resolve_segments()`(named stops)、`resolve_segments_by_gantry()`(gantry id)(純資料)
+- `corridor.py` — `Segment`、`GantryPoint`、`CORRIDOR`、`STOPS`、`resolve_segments()`(named stops)、`resolve_segments_by_gantry()`(gantry id)、`corridor_gantries()`(有序門架點清單)(純資料)
 - `parser.py` — `parse_row()` → `Record`(篩小客車+走廊門架)
 - `archive.py` — `fetch_day_records()`(下載+解壓 tar.gz,無快取)
 - `aggregate.py` — `compute_bins()`(跨午夜接續、bin 取中位數、缺值處理)、`summarize()`
