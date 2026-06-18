@@ -14,8 +14,8 @@ from corridor import (
 )
 from journey import compute_journey_times, index_speeds, summarize_journeys
 
-TAG_QUERY = "車速查詢"
-TAG_REFERENCE = "走廊資料"
+TAG_QUERY = "車速查詢 / Speed Queries"
+TAG_REFERENCE = "走廊資料 / Corridor Data"
 
 tags_metadata = [
     {
