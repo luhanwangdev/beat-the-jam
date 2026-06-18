@@ -372,7 +372,7 @@ wheels = [
 ]
 
 [[package]]
-name = "traffic-speed"
+name = "beat-the-jam"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

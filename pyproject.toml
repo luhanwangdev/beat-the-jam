@@ -1,7 +1,7 @@
 [project]
-name = "traffic-speed"
+name = "beat-the-jam"
 version = "0.1.0"
-description = "Add your description here"
+description = "幾點出發進雪隧最不塞 — historical freeway speed / travel-time queries for the homebound corridor to Yilan"
 readme = "README.md"
 authors = [
     { name = "luhanwangdev", email = "r10521523@ntu.edu.tw" }
