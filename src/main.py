@@ -51,7 +51,8 @@ def speed(
     except ArchiveUnavailable as exc:
         raise HTTPException(503, f"upstream archive unavailable: {exc}") from exc
 
-    bins = compute_bins(records, start, end, bin_minutes)
+    seg_lengths = {(s.gantry_from, s.gantry_to): s.length_km for s in segments}
+    bins = compute_bins(records, start, end, bin_minutes, seg_lengths)
     summary = summarize(bins)
     return {
         "origin": origin,
