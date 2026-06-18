@@ -91,3 +91,54 @@ def test_day_fetch_past_midnight_end_fetches_both_days(monkeypatch):
         "start": "2025-05-29T20:00", "end": "2025-05-30T05:00",
         "bin_minutes": 30})
     assert fetched_dates == [date(2025, 5, 29), date(2025, 5, 30)]
+
+
+def test_journey_endpoint_shape(monkeypatch):
+    import main
+    monkeypatch.setattr(main, "fetch_day_records", lambda day, wanted: [])
+    from fastapi.testclient import TestClient
+    client = TestClient(main.app)
+    resp = client.get("/journey", params={
+        "origin": "01F0213N", "destination": "05F0287S",
+        "start": "2025-05-29T20:00:00", "end": "2025-05-29T22:00:00",
+        "bin_minutes": 30,
+    })
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["origin"] == "01F0213N"
+    assert body["distance_km"] > 0
+    assert isinstance(body["journeys"], list) and body["journeys"]
+    assert {"depart", "arrive", "journey_minutes", "effective_kmh", "status"} <= body["journeys"][0].keys()
+    assert "fastest_depart" in body["summary"]
+
+
+def test_journey_unknown_gantry_returns_400(monkeypatch):
+    import main
+    monkeypatch.setattr(main, "fetch_day_records", lambda day, wanted: [])
+    from fastapi.testclient import TestClient
+    client = TestClient(main.app)
+    resp = client.get("/journey", params={
+        "origin": "ZZZ9999N", "destination": "05F0287S",
+        "start": "2025-05-29T20:00:00", "end": "2025-05-29T22:00:00",
+    })
+    assert resp.status_code == 400
+
+
+def test_journey_fetches_arrival_buffer_day(monkeypatch):
+    import main
+    called_days = []
+    monkeypatch.setattr(
+        main, "fetch_day_records",
+        lambda day, wanted: called_days.append(day) or [],
+    )
+    from fastapi.testclient import TestClient
+    client = TestClient(main.app)
+    resp = client.get("/journey", params={
+        "origin": "01F0213N", "destination": "05F0287S",
+        "start": "2025-05-29T23:30:00", "end": "2025-05-29T23:45:00",
+        "bin_minutes": 15,
+    })
+    assert resp.status_code == 200
+    # end + 2h buffer = 2025-05-30 01:45 -> must fetch both days
+    assert date(2025, 5, 29) in called_days
+    assert date(2025, 5, 30) in called_days
